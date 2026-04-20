@@ -21,10 +21,10 @@ const COLUMNS: {
 }[] = [
   { field: 'company', label: 'Company' },
   { field: 'role', label: 'Role', hideOnMobile: true },
-  { field: 'date_applied', label: 'Applied', className: 'w-28', hideOnMobile: true },
+  { field: 'date_applied', label: 'Applied', className: 'w-40', hideOnMobile: true },
   { field: 'status', label: 'Status', className: 'w-28' },
   { field: null, label: 'Link', className: 'w-12', hideOnMobile: true },
-  { field: null, label: 'Job Description', className: 'w-20' },
+  { field: null, label: '', className: 'w-20' },
 ]
 
 function SortIcon({
@@ -134,11 +134,6 @@ export default function ApplicationTable({
                 <td>
                   <span className="font-medium text-slate-900">{app.company}</span>
                   <p className="sm:hidden text-xs text-slate-500 mt-0.5">{app.role}</p>
-                  {app.notes && (
-                    <p className="hidden sm:block text-2xs text-slate-400 mt-0.5 truncate max-w-[220px]">
-                      {app.notes}
-                    </p>
-                  )}
                 </td>
 
                 {/* Role — desktop only */}
@@ -177,8 +172,8 @@ export default function ApplicationTable({
                 {/* Actions */}
                 <td>
                   <div className="flex items-center gap-1">
-                    {/* Description toggle — only if there's content */}
-                    {app.job_description && (
+                    {/* Expand toggle — show if notes or description exists */}
+                    {(app.notes || app.job_description) && (
                       <button
                         onClick={() => toggleExpand(app.id)}
                         className={cn(
@@ -189,18 +184,14 @@ export default function ApplicationTable({
                         )}
                         title={expandedRow === app.id ? 'Hide description' : 'Show description'}
                       >
-                        {expandedRow === app.id ? (
-                          // Minus / collapse
-                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
-                            <line x1="2" y1="5" x2="8" y2="5" />
-                          </svg>
-                        ) : (
-                          // Plus / expand
-                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
-                            <line x1="5" y1="2" x2="5" y2="8" />
-                            <line x1="2" y1="5" x2="8" y2="5" />
-                          </svg>
-                        )}
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                          className={cn(expandedRow === app.id && 'text-teal-600')}
+                        >
+                          <path d="M4 2h6l3 3v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" />
+                          <polyline points="10 2 10 5 13 5" />
+                          <line x1="5" y1="9" x2="11" y2="9" />
+                          <line x1="5" y1="12" x2="9" y2="12" />
+                        </svg>
                       </button>
                     )}
 
@@ -228,16 +219,44 @@ export default function ApplicationTable({
                 </td>
               </tr>
 
-              {/* Expandable description row */}
-              {expandedRow === app.id && app.job_description && (
-                <tr key={`${app.id}-desc`} className="bg-slate-50">
+              {/* Expandable row — notes + description */}
+              {expandedRow === app.id && (app.notes || app.job_description) && (
+                <tr key={`${app.id}-expanded`} className="bg-slate-50">
                   <td colSpan={6} className="px-4 py-3">
-                    <p className="text-2xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                      Job description
-                    </p>
-                    <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans leading-relaxed max-h-64 overflow-y-auto">
-                      {app.job_description}
-                    </pre>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1 space-y-4">
+                        {app.notes && (
+                          <div>
+                            <p className="text-2xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                              Notes
+                            </p>
+                            <p className="text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">
+                              {app.notes}
+                            </p>
+                          </div>
+                        )}
+                        {app.job_description && (
+                          <div>
+                            <p className="text-2xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                              Job description
+                            </p>
+                            <pre className="text-xs text-slate-600 whitespace-pre-wrap font-sans leading-relaxed max-h-64 overflow-y-auto">
+                              {app.job_description}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => toggleExpand(app.id)}
+                        className="text-slate-400 hover:text-slate-600 transition-colors ml-4 mt-0.5 shrink-0"
+                        aria-label="Close"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                          <line x1="3" y1="3" x2="13" y2="13" />
+                          <line x1="13" y1="3" x2="3" y2="13" />
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )}

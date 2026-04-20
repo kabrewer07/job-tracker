@@ -73,33 +73,32 @@ export default function ApplicationForm({
 
   return (
     <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className="label" htmlFor="company">
-            Company <span className="text-rose-500">*</span>
-          </label>
-          <input
-            id="company"
-            className="input"
-            required
-            placeholder="Acme Corp"
-            value={form.company}
-            onChange={(e) => set('company', e.target.value)}
-          />
-        </div>
-        <div>
-          <label className="label" htmlFor="role">
-            Role <span className="text-rose-500">*</span>
-          </label>
-          <input
-            id="role"
-            className="input"
-            required
-            placeholder="Senior Engineer"
-            value={form.role}
-            onChange={(e) => set('role', e.target.value)}
-          />
-        </div>
+      <div>
+        <label className="label" htmlFor="company">
+          Company <span className="text-rose-500">*</span>
+        </label>
+        <input
+          id="company"
+          className="input"
+          required
+          placeholder="Acme Corp"
+          value={form.company}
+          onChange={(e) => set('company', e.target.value)}
+        />
+      </div>
+
+      <div>
+        <label className="label" htmlFor="role">
+          Role <span className="text-rose-500">*</span>
+        </label>
+        <input
+          id="role"
+          className="input"
+          required
+          placeholder="Senior Engineer"
+          value={form.role}
+          onChange={(e) => set('role', e.target.value)}
+        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -155,8 +154,8 @@ export default function ApplicationForm({
         </label>
         <textarea
           id="notes"
-          className="input min-h-[72px] resize-y"
-          placeholder="Referral from Alice, recruiter name, next steps…"
+          className="input min-h-[48px] resize-y"
+          placeholder="Referral, recruiter name, salary requested, next steps…"
           value={form.notes ?? ''}
           onChange={(e) => set('notes', e.target.value)}
         />
