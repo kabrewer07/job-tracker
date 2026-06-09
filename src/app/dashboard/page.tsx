@@ -62,7 +62,7 @@ export default async function DashboardPage() {
 
   const activeCount = byStatus.applied + byStatus.interviewing
 
-  const recent = apps.slice(0, 8)
+  const recent = apps.slice(0, 5)
 
   // Activity by week (last 8 weeks)
   const weeksMap: Record<string, number> = {}
