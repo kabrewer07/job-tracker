@@ -49,6 +49,10 @@ function LoginForm() {
     setMessage(null)
   }
 
+  function authRedirectPath(path: string) {
+    return `${window.location.origin}${path}`
+  }
+
   async function handleGoogleSignIn() {
     setLoading(true)
     resetFeedback()
@@ -57,7 +61,7 @@ function LoginForm() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        redirectTo: authRedirectPath('/auth/callback'),
       },
     })
 
@@ -74,7 +78,7 @@ function LoginForm() {
 
     const supabase = createClient()
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/auth/update-password`,
+      redirectTo: authRedirectPath('/auth/callback?next=/auth/update-password'),
     })
 
     if (error) {
