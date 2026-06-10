@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import type { Application, SortField, SortState } from '@/lib/types'
 import StatusBadge from './StatusBadge'
 import { formatDate, cn } from '@/lib/utils'
@@ -101,9 +101,9 @@ export default function ApplicationTable({
       <table className="data-table">
         <thead>
           <tr>
-            {COLUMNS.map((col) => (
+            {COLUMNS.map((col, index) => (
               <th
-                key={col.label || 'actions'}
+                key={col.field ?? `col-${index}`}
                 className={cn(
                   col.className,
                   col.field && 'cursor-pointer hover:text-slate-700',
@@ -124,9 +124,8 @@ export default function ApplicationTable({
         </thead>
         <tbody>
           {applications.map((app) => (
-            <>
+            <Fragment key={app.id}>
               <tr
-                key={app.id}
                 onMouseEnter={() => setHoveredRow(app.id)}
                 onMouseLeave={() => setHoveredRow(null)}
               >
@@ -221,7 +220,7 @@ export default function ApplicationTable({
 
               {/* Expandable row — notes + description */}
               {expandedRow === app.id && (app.notes || app.job_description) && (
-                <tr key={`${app.id}-expanded`} className="bg-slate-50">
+                <tr className="bg-slate-50">
                   <td colSpan={6} className="px-4 py-3">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1 space-y-4">
@@ -260,7 +259,7 @@ export default function ApplicationTable({
                   </td>
                 </tr>
               )}
-            </>
+            </Fragment>
           ))}
         </tbody>
       </table>

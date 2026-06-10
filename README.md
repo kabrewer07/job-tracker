@@ -5,7 +5,7 @@ Track job applications without the spreadsheet mess. Built with Next.js 15, Supa
 ## Stack
 
 - **Next.js 15** (App Router)
-- **Supabase** — Postgres + Auth (magic link)
+- **Supabase** — Postgres + Auth (Google OAuth, email/password)
 - **Tailwind CSS** — custom palette, no component library
 - **Vercel** — deployment target
 
@@ -36,15 +36,28 @@ cp .env.example .env.local
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SITE_URL=http://localhost:3100
 ```
 
-### 5. Add the auth redirect URL
+### 5. Configure auth in Supabase
 
-In Supabase → **Authentication → URL Configuration**, add to Redirect URLs:
+**Redirect URLs** — Supabase → **Authentication → URL Configuration**:
 
-- `http://localhost:3000/auth/callback`
+- `http://localhost:3100/auth/callback`
 - `https://your-app.vercel.app/auth/callback` (once deployed)
+
+**Email/password** — **Authentication → Providers → Email**:
+
+- Enable Email provider
+- Enable sign ups
+- Optional: disable "Confirm email" for simpler local dev (otherwise new users must confirm before signing in)
+
+**Google OAuth** — **Authentication → Providers → Google**:
+
+1. Enable Google
+2. Create OAuth credentials in [Google Cloud Console](https://console.cloud.google.com/) (Web application)
+3. Add authorized redirect URI: `https://<your-project-ref>.supabase.co/auth/v1/callback`
+4. Paste the Client ID and Client Secret into Supabase
 
 ### 6. Run it
 
@@ -62,7 +75,7 @@ Push to GitHub, import the repo on Vercel, add the three env vars in project set
 
 ## Features
 
-- Passwordless email login via magic link
+- Sign in with Google or email/password
 - Add, edit, and delete applications — company, role, date, status, job URL, notes
 - Searchable and filterable table with sortable columns
 - Simple dashboard with status breakdown and weekly activity
