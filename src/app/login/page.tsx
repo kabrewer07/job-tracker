@@ -4,6 +4,9 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
+// Toggle to show email/password sign-in, sign-up, and forgot password.
+const SHOW_EMAIL_AUTH = false
+
 function GoogleIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
@@ -154,7 +157,7 @@ function LoginForm() {
         </div>
 
         <div className="bg-white border border-slate-200 rounded-md p-6">
-          {mode === 'forgot' ? (
+          {SHOW_EMAIL_AUTH && mode === 'forgot' ? (
             <>
               <h1 className="text-sm font-semibold text-slate-900 mb-0.5">
                 Reset password
@@ -217,12 +220,14 @@ function LoginForm() {
           ) : (
             <>
               <h1 className="text-sm font-semibold text-slate-900 mb-0.5">
-                {mode === 'signin' ? 'Sign in' : 'Create account'}
+                {SHOW_EMAIL_AUTH && mode === 'signup' ? 'Create account' : 'Sign in'}
               </h1>
               <p className="text-xs text-slate-500 mb-5">
-                {mode === 'signin'
-                  ? 'Sign in with Google or your email and password.'
-                  : 'Create an account with your email and password.'}
+                {SHOW_EMAIL_AUTH
+                  ? mode === 'signin'
+                    ? 'Sign in with Google or your email and password.'
+                    : 'Create an account with your email and password.'
+                  : 'Sign in with your Google account to continue.'}
               </p>
 
               <button
@@ -235,119 +240,129 @@ function LoginForm() {
                 Continue with Google
               </button>
 
-              <div className="relative my-5">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200" />
-                </div>
-                <div className="relative flex justify-center text-2xs">
-                  <span className="bg-white px-2 text-slate-400">or</span>
-                </div>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <div>
-                  <label htmlFor="email" className="label">
-                    Email address
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    className="input"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label htmlFor="password" className="label mb-0">
-                      Password
-                    </label>
-                    {mode === 'signin' && (
-                      <button
-                        type="button"
-                        className="text-2xs text-teal-600 hover:text-teal-700 font-medium"
-                        onClick={() => {
-                          setMode('forgot')
-                          resetFeedback()
-                        }}
-                      >
-                        Forgot password?
-                      </button>
-                    )}
+              {SHOW_EMAIL_AUTH && (
+                <>
+                  <div className="relative my-5">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-slate-200" />
+                    </div>
+                    <div className="relative flex justify-center text-2xs">
+                      <span className="bg-white px-2 text-slate-400">or</span>
+                    </div>
                   </div>
-                  <input
-                    id="password"
-                    type="password"
-                    autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                    required
-                    minLength={6}
-                    className="input"
-                    placeholder="At least 6 characters"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
 
-                {error && (
-                  <p className="text-xs text-rose-600 bg-rose-50 border border-rose-100 rounded px-2.5 py-1.5">
-                    {error}
-                  </p>
-                )}
+                  <form onSubmit={handleSubmit} className="space-y-3">
+                    <div>
+                      <label htmlFor="email" className="label">
+                        Email address
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        autoComplete="email"
+                        required
+                        className="input"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
 
-                {message && (
-                  <p className="text-xs text-teal-700 bg-teal-50 border border-teal-100 rounded px-2.5 py-1.5">
-                    {message}
-                  </p>
-                )}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label htmlFor="password" className="label mb-0">
+                          Password
+                        </label>
+                        {mode === 'signin' && (
+                          <button
+                            type="button"
+                            className="text-2xs text-teal-600 hover:text-teal-700 font-medium"
+                            onClick={() => {
+                              setMode('forgot')
+                              resetFeedback()
+                            }}
+                          >
+                            Forgot password?
+                          </button>
+                        )}
+                      </div>
+                      <input
+                        id="password"
+                        type="password"
+                        autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                        required
+                        minLength={6}
+                        className="input"
+                        placeholder="At least 6 characters"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </div>
 
-                <button
-                  type="submit"
-                  disabled={loading || !email || !password}
-                  className="btn-primary w-full justify-center"
-                >
-                  {loading
-                    ? 'Please wait…'
-                    : mode === 'signin'
-                      ? 'Sign in'
-                      : 'Create account'}
-                </button>
-              </form>
+                    {error && (
+                      <p className="text-xs text-rose-600 bg-rose-50 border border-rose-100 rounded px-2.5 py-1.5">
+                        {error}
+                      </p>
+                    )}
 
-              <p className="mt-4 text-center text-xs text-slate-500">
-                {mode === 'signin' ? (
-                  <>
-                    Don&apos;t have an account?{' '}
+                    {message && (
+                      <p className="text-xs text-teal-700 bg-teal-50 border border-teal-100 rounded px-2.5 py-1.5">
+                        {message}
+                      </p>
+                    )}
+
                     <button
-                      type="button"
-                      className="text-teal-600 hover:text-teal-700 font-medium"
-                      onClick={() => {
-                        setMode('signup')
-                        resetFeedback()
-                      }}
+                      type="submit"
+                      disabled={loading || !email || !password}
+                      className="btn-primary w-full justify-center"
                     >
-                      Sign up
+                      {loading
+                        ? 'Please wait…'
+                        : mode === 'signin'
+                          ? 'Sign in'
+                          : 'Create account'}
                     </button>
-                  </>
-                ) : (
-                  <>
-                    Already have an account?{' '}
-                    <button
-                      type="button"
-                      className="text-teal-600 hover:text-teal-700 font-medium"
-                      onClick={() => {
-                        setMode('signin')
-                        resetFeedback()
-                      }}
-                    >
-                      Sign in
-                    </button>
-                  </>
-                )}
-              </p>
+                  </form>
+
+                  <p className="mt-4 text-center text-xs text-slate-500">
+                    {mode === 'signin' ? (
+                      <>
+                        Don&apos;t have an account?{' '}
+                        <button
+                          type="button"
+                          className="text-teal-600 hover:text-teal-700 font-medium"
+                          onClick={() => {
+                            setMode('signup')
+                            resetFeedback()
+                          }}
+                        >
+                          Sign up
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        Already have an account?{' '}
+                        <button
+                          type="button"
+                          className="text-teal-600 hover:text-teal-700 font-medium"
+                          onClick={() => {
+                            setMode('signin')
+                            resetFeedback()
+                          }}
+                        >
+                          Sign in
+                        </button>
+                      </>
+                    )}
+                  </p>
+                </>
+              )}
+
+              {!SHOW_EMAIL_AUTH && error && (
+                <p className="text-xs text-rose-600 bg-rose-50 border border-rose-100 rounded px-2.5 py-1.5 mt-3">
+                  {error}
+                </p>
+              )}
             </>
           )}
         </div>
