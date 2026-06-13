@@ -1,8 +1,10 @@
 'use client'
 
+import Link from 'next/link'
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getSafeRedirectPath } from '@/lib/utils'
 
 // Toggle to show email/password sign-in, sign-up, and forgot password.
 const SHOW_EMAIL_AUTH = false
@@ -60,11 +62,14 @@ function LoginForm() {
     setLoading(true)
     resetFeedback()
 
+    const next = getSafeRedirectPath(searchParams.get('next'))
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: authRedirectPath('/auth/callback'),
+        redirectTo: authRedirectPath(
+          `/auth/callback?next=${encodeURIComponent(next)}`
+        ),
       },
     })
 
@@ -102,6 +107,8 @@ function LoginForm() {
 
     const supabase = createClient()
 
+    const next = getSafeRedirectPath(searchParams.get('next'))
+
     if (mode === 'signin') {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
 
@@ -111,7 +118,7 @@ function LoginForm() {
         return
       }
 
-      router.push('/dashboard')
+      router.push(next)
       router.refresh()
     } else {
       const { data, error } = await supabase.auth.signUp({ email, password })
@@ -123,7 +130,7 @@ function LoginForm() {
       }
 
       if (data.session) {
-        router.push('/dashboard')
+        router.push(next)
         router.refresh()
       } else {
         setMessage('Account created. Check your email to confirm, then sign in.')
@@ -138,6 +145,13 @@ function LoginForm() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
+        <Link
+          href="/"
+          className="inline-block mb-4 text-xs text-slate-500 hover:text-teal-600 transition-colors"
+        >
+          ← Back to home
+        </Link>
+
         <div className="mb-8">
           <div className="flex items-center gap-2.5 mb-1">
             <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">

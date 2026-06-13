@@ -33,6 +33,16 @@ function TableIcon() {
   )
 }
 
+function SparkleIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 1.5l1 3.5h3.5l-2.8 2 1 3.5L8 9l-2.7 1.5 1-3.5-2.8-2H7L8 1.5z" />
+      <line x1="13" y1="2" x2="13" y2="3.5" />
+      <line x1="13.75" y1="2.75" x2="12.25" y2="2.75" />
+    </svg>
+  )
+}
+
 function LogOutIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -46,6 +56,7 @@ function LogOutIcon() {
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Overview', icon: <LayoutIcon /> },
   { href: '/dashboard/applications', label: 'Applications', icon: <TableIcon /> },
+  { href: '/analyze', label: 'AI Analyzer', icon: <SparkleIcon /> },
 ]
 
 interface SidebarProps {

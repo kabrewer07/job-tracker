@@ -9,6 +9,7 @@ import type { Application, ApplicationStatus } from '@/lib/types'
 export const metadata: Metadata = { title: 'Overview' }
 
 const STATUS_ORDER: ApplicationStatus[] = [
+  'saved',
   'applied',
   'interviewing',
   'offer',
@@ -74,6 +75,7 @@ export default async function DashboardPage() {
     weeksMap[key] = 0
   }
   apps.forEach((a) => {
+    if (!a.date_applied) return
     const d = new Date(a.date_applied)
     const key = `${d.getFullYear()}-W${String(getWeekNumber(d)).padStart(2, '0')}`
     if (key in weeksMap) weeksMap[key]++
@@ -127,7 +129,9 @@ export default async function DashboardPage() {
                   <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
-                        s === 'applied'
+                        s === 'saved'
+                          ? 'bg-amber-400'
+                          : s === 'applied'
                           ? 'bg-slate-400'
                           : s === 'interviewing'
                             ? 'bg-sky-500'

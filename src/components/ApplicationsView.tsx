@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { Application, ApplicationStatus, FilterState, SortField, SortState } from '@/lib/types'
+import { STATUS_FILTER_OPTIONS } from '@/lib/types'
 import { filterApplications, sortApplications } from '@/lib/utils'
 import { deleteApplication } from '@/app/actions'
 import ApplicationTable from './ApplicationTable'
@@ -10,13 +11,8 @@ import ApplicationForm from './ApplicationForm'
 import Modal from './Modal'
 import StatusBadge from './StatusBadge'
 
-const STATUS_FILTERS: { value: ApplicationStatus | 'all'; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'applied', label: 'Applied' },
-  { value: 'interviewing', label: 'Interviewing' },
-  { value: 'offer', label: 'Offer' },
-  { value: 'rejected', label: 'Rejected' },
-]
+const STATUS_FILTERS = STATUS_FILTER_OPTIONS
+const PAGE_SIZE = 10
 
 function PlusIcon() {
   return (
@@ -55,17 +51,42 @@ export default function ApplicationsView({
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingApp, setEditingApp] = useState<Application | undefined>()
+  const [deletingApp, setDeletingApp] = useState<Application | undefined>()
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [isDeletePending, startDeleteTransition] = useTransition()
+  const [page, setPage] = useState(1)
 
-  // Auto-open the add modal when navigated here with ?new=1
+  const filtered = useMemo(
+    () => filterApplications(initialApplications, filters),
+    [initialApplications, filters]
+  )
+  const sorted = useMemo(
+    () => sortApplications(filtered, sort),
+    [filtered, sort]
+  )
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+  const paginated = sorted.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE
+  )
+  const rangeStart = sorted.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1
+  const rangeEnd = Math.min(safePage * PAGE_SIZE, sorted.length)
+
   useEffect(() => {
     if (searchParams.get('new') === '1') {
       setIsFormOpen(true)
       router.replace('/dashboard/applications')
     }
   }, [searchParams, router])
-  const [deletingApp, setDeletingApp] = useState<Application | undefined>()
-  const [deleteError, setDeleteError] = useState<string | null>(null)
-  const [isDeletePending, startDeleteTransition] = useTransition()
+
+  useEffect(() => {
+    setPage(1)
+  }, [filters.search, filters.status, sort.field, sort.direction])
+
+  useEffect(() => {
+    setPage((p) => Math.min(p, totalPages))
+  }, [totalPages])
 
   function handleSort(field: SortField) {
     setSort((prev) =>
@@ -107,17 +128,12 @@ export default function ApplicationsView({
     })
   }
 
-  const filtered = filterApplications(initialApplications, filters)
-  const sorted = sortApplications(filtered, sort)
-
   return (
     <>
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-4">
-        {/* Top row on mobile: search + add button */}
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          {/* Search */}
-          <div className="relative flex-1 sm:max-w-xs">
+      <div className="flex flex-col gap-2 sm:gap-3 mb-4">
+        <div className="flex items-center gap-2 w-full sm:max-w-xs">
+          <div className="relative flex-1">
             <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
               <SearchIcon />
             </span>
@@ -132,7 +148,6 @@ export default function ApplicationsView({
             />
           </div>
 
-          {/* Add button — shown inline on mobile */}
           <div className="shrink-0 sm:hidden">
             <button onClick={openAdd} className="btn-primary">
               <PlusIcon />
@@ -141,29 +156,53 @@ export default function ApplicationsView({
           </div>
         </div>
 
-        {/* Second row on mobile: status filters + add button on desktop */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Status filter tabs */}
-          <div className="flex items-center border border-slate-200 rounded overflow-hidden bg-white shrink-0 overflow-x-auto">
-            {STATUS_FILTERS.map((sf) => (
-              <button
-                key={sf.value}
-                onClick={() =>
-                  setFilters((f) => ({ ...f, status: sf.value }))
-                }
-                className={`px-2.5 py-1 text-xs font-medium border-r border-slate-200 last:border-0 transition-colors whitespace-nowrap ${
-                  filters.status === sf.value
-                    ? 'bg-teal-600 text-white'
-                    : 'text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                {sf.label}
-              </button>
-            ))}
+        <div className="w-full sm:flex sm:items-center sm:gap-3 sm:min-w-0">
+          {/* Mobile: compact dropdown */}
+          <div className="sm:hidden">
+            <label className="sr-only" htmlFor="status-filter">
+              Filter by status
+            </label>
+            <select
+              id="status-filter"
+              className="input text-xs"
+              value={filters.status}
+              onChange={(e) =>
+                setFilters((f) => ({
+                  ...f,
+                  status: e.target.value as FilterState['status'],
+                }))
+              }
+            >
+              {STATUS_FILTERS.map((sf) => (
+                <option key={sf.value} value={sf.value}>
+                  {sf.value === 'all' ? 'All statuses' : sf.label}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Add button — desktop only */}
-          <div className="hidden sm:block ml-auto shrink-0">
+          {/* sm+: segmented pills */}
+          <div className="hidden sm:block min-w-0 flex-1">
+            <div className="inline-flex items-center border border-slate-200 rounded overflow-hidden bg-white">
+              {STATUS_FILTERS.map((sf) => (
+                <button
+                  key={sf.value}
+                  onClick={() =>
+                    setFilters((f) => ({ ...f, status: sf.value }))
+                  }
+                  className={`px-2.5 py-1 text-xs font-medium border-r border-slate-200 last:border-0 transition-colors whitespace-nowrap ${
+                    filters.status === sf.value
+                      ? 'bg-teal-600 text-white'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {sf.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="hidden sm:block shrink-0">
             <button onClick={openAdd} className="btn-primary">
               <PlusIcon />
               Add application
@@ -178,6 +217,11 @@ export default function ApplicationsView({
           {sorted.length}
         </span>{' '}
         {sorted.length === 1 ? 'application' : 'applications'}
+        {sorted.length > PAGE_SIZE && (
+          <span className="ml-0.5">
+            · showing {rangeStart}–{rangeEnd}
+          </span>
+        )}
         {filters.status !== 'all' && (
           <span className="ml-0.5">
             · <StatusBadge status={filters.status as ApplicationStatus} size="xs" />
@@ -188,13 +232,39 @@ export default function ApplicationsView({
       {/* Table */}
       <div className="bg-white border border-slate-200 rounded overflow-hidden">
         <ApplicationTable
-          applications={sorted}
+          applications={paginated}
           onEdit={openEdit}
           onDelete={confirmDelete}
           sort={sort}
           onSort={handleSort}
         />
       </div>
+
+      {sorted.length > PAGE_SIZE && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-3">
+          <p className="text-xs text-slate-500">
+            Page {safePage} of {totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              className="btn-secondary text-xs"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              className="btn-secondary text-xs"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Add/Edit modal */}
       <Modal

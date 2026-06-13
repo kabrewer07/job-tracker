@@ -1,4 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { getSafeRedirectPath } from '@/lib/utils'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -41,7 +42,8 @@ export async function middleware(request: NextRequest) {
 
   // Redirect authenticated users away from the login page
   if (user && pathname === '/login') {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    const next = getSafeRedirectPath(request.nextUrl.searchParams.get('next'))
+    return NextResponse.redirect(new URL(next, request.url))
   }
 
   if (!user && pathname === '/auth/update-password') {

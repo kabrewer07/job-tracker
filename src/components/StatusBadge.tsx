@@ -5,6 +5,10 @@ const statusConfig: Record<
   ApplicationStatus,
   { label: string; className: string }
 > = {
+  saved: {
+    label: 'Not applied yet',
+    className: 'bg-amber-50 text-amber-700 border-amber-200',
+  },
   applied: {
     label: 'Applied',
     className: 'bg-slate-100 text-slate-600 border-slate-200',

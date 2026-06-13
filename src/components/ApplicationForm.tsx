@@ -3,7 +3,8 @@
 import { useState, useTransition } from 'react'
 import { createApplication, updateApplication } from '@/app/actions'
 import type { Application, ApplicationInsert, ApplicationStatus } from '@/lib/types'
-import { formatDateInput } from '@/lib/utils'
+import { STATUS_OPTIONS, statusRequiresDateApplied } from '@/lib/types'
+import { buildApplicationPayload, formatDateInput } from '@/lib/utils'
 
 interface ApplicationFormProps {
   application?: Application
@@ -11,14 +12,9 @@ interface ApplicationFormProps {
   onCancel: () => void
 }
 
-const STATUS_OPTIONS: { value: ApplicationStatus; label: string }[] = [
-  { value: 'applied', label: 'Applied' },
-  { value: 'interviewing', label: 'Interviewing' },
-  { value: 'offer', label: 'Offer' },
-  { value: 'rejected', label: 'Rejected' },
-]
-
 const today = new Date().toISOString().split('T')[0]
+
+type FormState = Omit<ApplicationInsert, 'date_applied'> & { date_applied: string }
 
 export default function ApplicationForm({
   application,
@@ -29,32 +25,43 @@ export default function ApplicationForm({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
-  const [form, setForm] = useState<ApplicationInsert>({
+  const [form, setForm] = useState<FormState>({
     company: application?.company ?? '',
     role: application?.role ?? '',
-    date_applied: application ? formatDateInput(application.date_applied) : today,
+    date_applied: application
+      ? formatDateInput(application.date_applied)
+      : today,
     status: application?.status ?? 'applied',
     job_url: application?.job_url ?? '',
     notes: application?.notes ?? '',
     job_description: application?.job_description ?? '',
   })
 
-  function set<K extends keyof ApplicationInsert>(
-    key: K,
-    value: ApplicationInsert[K]
-  ) {
+  function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
+  }
+
+  function handleStatusChange(status: ApplicationStatus) {
+    setForm((prev) => ({
+      ...prev,
+      status,
+      date_applied:
+        status === 'saved'
+          ? ''
+          : prev.date_applied || today,
+    }))
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
 
-    const payload: ApplicationInsert = {
-      ...form,
-      job_url: form.job_url?.trim() || null,
-      notes: form.notes?.trim() || null,
-      job_description: form.job_description?.trim() || null,
+    let payload: ApplicationInsert
+    try {
+      payload = buildApplicationPayload(form)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong.')
+      return
     }
 
     startTransition(async () => {
@@ -104,13 +111,16 @@ export default function ApplicationForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="label" htmlFor="date_applied">
-            Date applied <span className="text-rose-500">*</span>
+            Date applied
+            {statusRequiresDateApplied(form.status) && (
+              <span className="text-rose-500"> *</span>
+            )}
           </label>
           <input
             id="date_applied"
             type="date"
             className="input"
-            required
+            required={statusRequiresDateApplied(form.status)}
             value={form.date_applied}
             onChange={(e) => set('date_applied', e.target.value)}
           />
@@ -123,7 +133,9 @@ export default function ApplicationForm({
             id="status"
             className="input"
             value={form.status}
-            onChange={(e) => set('status', e.target.value as ApplicationStatus)}
+            onChange={(e) =>
+              handleStatusChange(e.target.value as ApplicationStatus)
+            }
           >
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -141,7 +153,7 @@ export default function ApplicationForm({
         <input
           id="job_url"
           type="url"
-          className="input font-mono text-xs"
+          className="input"
           placeholder="https://company.com/jobs/123"
           value={form.job_url ?? ''}
           onChange={(e) => set('job_url', e.target.value)}
@@ -170,7 +182,7 @@ export default function ApplicationForm({
         </p>
         <textarea
           id="job_description"
-          className="input min-h-[140px] resize-y font-mono text-xs leading-relaxed"
+          className="input min-h-[140px] resize-y leading-relaxed"
           placeholder="Paste the job description here…"
           value={form.job_description ?? ''}
           onChange={(e) => set('job_description', e.target.value)}
