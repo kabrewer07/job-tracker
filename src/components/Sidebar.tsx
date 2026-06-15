@@ -56,6 +56,7 @@ function LogOutIcon() {
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Overview', icon: <LayoutIcon /> },
   { href: '/dashboard/applications', label: 'Applications', icon: <TableIcon /> },
+  { href: '/dashboard/analyze', label: 'AI Analyzer', icon: <SparkleIcon /> },
 ]
 
 interface SidebarProps {

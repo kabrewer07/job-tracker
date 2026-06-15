@@ -61,6 +61,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(next, request.url))
   }
 
+  if (user && pathname === '/analyze') {
+    return NextResponse.redirect(new URL('/dashboard/analyze', request.url))
+  }
+
   // Redirect unauthenticated users away from protected routes
   if (!user && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(loginRedirectUrl(request, pathname))
