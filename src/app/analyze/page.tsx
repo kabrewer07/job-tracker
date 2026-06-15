@@ -5,6 +5,7 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { createApplication } from '@/app/actions'
 import Modal from '@/components/Modal'
+import SignInButton from '@/components/SignInButton'
 import { createClient } from '@/lib/supabase/client'
 import type { ApplicationInsert, ApplicationStatus } from '@/lib/types'
 import { STATUS_OPTIONS, statusRequiresDateApplied } from '@/lib/types'
@@ -13,8 +14,6 @@ import {
   restoreAnalyzePending,
   saveAnalyzePending,
 } from '@/lib/utils'
-
-const LOGIN_HREF = '/login?next=/analyze'
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -159,9 +158,13 @@ function SaveActions({
   }
 
   return (
-    <Link href={LOGIN_HREF} onClick={onSignIn} className={saveButtonClass}>
+    <SignInButton
+      next="/analyze"
+      onBeforeOpen={onSignIn}
+      className={saveButtonClass}
+    >
       Sign in to save
-    </Link>
+    </SignInButton>
   )
 }
 
@@ -378,13 +381,13 @@ export default function AnalyzePage() {
                   Dashboard
                 </Link>
               ) : (
-                <Link
-                  href={LOGIN_HREF}
-                  onClick={persistBeforeLogin}
+                <SignInButton
+                  next="/analyze"
+                  onBeforeOpen={persistBeforeLogin}
                   className="btn-primary text-xs sm:text-sm"
                 >
                   Sign in
-                </Link>
+                </SignInButton>
               )
             )}
           </nav>

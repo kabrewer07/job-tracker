@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
+import LoginModalProvider from '@/components/LoginModalProvider'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -16,7 +18,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <body className="h-full">{children}</body>
+      <body className="h-full">
+        <Suspense fallback={null}>
+          <LoginModalProvider>{children}</LoginModalProvider>
+        </Suspense>
+      </body>
     </html>
   )
 }

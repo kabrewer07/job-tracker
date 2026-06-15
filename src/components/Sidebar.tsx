@@ -56,7 +56,6 @@ function LogOutIcon() {
 const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Overview', icon: <LayoutIcon /> },
   { href: '/dashboard/applications', label: 'Applications', icon: <TableIcon /> },
-  { href: '/analyze', label: 'AI Analyzer', icon: <SparkleIcon /> },
 ]
 
 interface SidebarProps {
@@ -70,7 +69,7 @@ export default function Sidebar({ email, onClose }: SidebarProps) {
 
   async function handleSignOut() {
     await signOut()
-    router.push('/login')
+    router.push('/')
     router.refresh()
   }
 

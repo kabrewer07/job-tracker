@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import SignInButton from '@/components/SignInButton'
 
 function LogoWordmark() {
   return (
@@ -109,9 +110,9 @@ export default async function LandingPage() {
                 Dashboard
               </Link>
             ) : (
-              <Link href="/login" className="btn-primary text-xs sm:text-sm">
+              <SignInButton className="btn-primary text-xs sm:text-sm">
                 Sign in
-              </Link>
+              </SignInButton>
             )}
           </nav>
         </div>
@@ -130,9 +131,9 @@ export default async function LandingPage() {
               role is really asking for.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
-              <Link href="/login" className="btn-primary justify-center px-5 py-2">
+              <SignInButton className="btn-primary justify-center px-5 py-2">
                 Get started free
-              </Link>
+              </SignInButton>
               <Link href="/analyze" className="btn-secondary justify-center px-5 py-2">
                 Try the AI Analyzer
               </Link>

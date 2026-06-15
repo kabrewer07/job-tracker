@@ -15,6 +15,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // Return to login with an error indicator on failure
-  return NextResponse.redirect(`${origin}/login?error=auth`)
+  // Return to home with login modal on failure
+  return NextResponse.redirect(`${origin}/?login=1&error=auth`)
 }
