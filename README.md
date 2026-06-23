@@ -59,7 +59,10 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3100
 **Redirect URLs** — Supabase → **Authentication → URL Configuration**:
 
 - `http://localhost:3100/auth/callback`
-- `https://your-app.vercel.app/auth/callback` (once deployed)
+- `https://your-app.vercel.app/auth/callback` (production — use your exact Vercel or custom domain)
+- Optional for preview deploys: `https://*.vercel.app/auth/callback`
+
+**Site URL** (same page) — set this to your **production** URL (e.g. `https://your-app.vercel.app`), **not** localhost. If Site URL is still `http://localhost:3100`, Supabase will send users there whenever a redirect isn’t fully allowed — a common cause of “OAuth works on Google but I land on localhost” on Vercel.
 
 **Email/password** — **Authentication → Providers → Email**:
 
@@ -84,7 +87,31 @@ npm run dev
 
 ## Deploying to Vercel
 
-Push to GitHub, import the repo on Vercel, add the three env vars in project settings (set `NEXT_PUBLIC_SITE_URL` to your production domain), deploy. Then add the production callback URL to Supabase's redirect allow-list.
+Push to GitHub, import the repo on Vercel, add env vars in project settings, deploy. Then add the production callback URL to Supabase's redirect allow-list (see step 5).
+
+**Vercel env vars (Production):**
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_SITE_URL=https://your-app.vercel.app
+OPENAI_API_KEY=sk-...
+```
+
+Do **not** set `NEXT_PUBLIC_SITE_URL` to `localhost` on Production. Redeploy after changing env vars.
+
+### OAuth redirects to localhost on Vercel?
+
+The Google OAuth screen always shows Supabase’s callback (`*.supabase.co/auth/v1/callback`) — that’s normal. Your app URL is passed separately as `redirectTo`.
+
+If you end up on localhost after signing in:
+
+1. **Supabase → Authentication → URL Configuration → Site URL** — must be your Vercel URL, not `http://localhost:3100`
+2. **Redirect URLs** — must include `https://your-exact-vercel-domain.vercel.app/auth/callback` (or `https://*.vercel.app/auth/callback` for previews)
+3. **Vercel → Environment Variables** — `NEXT_PUBLIC_SITE_URL` should match production (not localhost)
+4. **Redeploy** on Vercel after env changes
+
+The app builds OAuth `redirectTo` from `window.location.origin` on the page you’re on, so if you’re on Vercel, it requests a Vercel callback. Supabase only honors that if it’s on the allow list; otherwise it falls back to **Site URL** (often localhost from initial setup).
 
 ---
 

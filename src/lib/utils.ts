@@ -86,8 +86,6 @@ export function restoreAnalyzePending(): {
   const raw = sessionStorage.getItem(ANALYZE_PENDING_KEY)
   if (!raw) return null
 
-  sessionStorage.removeItem(ANALYZE_PENDING_KEY)
-
   try {
     const parsed = JSON.parse(raw) as {
       jobDescription?: unknown
@@ -107,6 +105,11 @@ export function restoreAnalyzePending(): {
   }
 
   return null
+}
+
+export function clearAnalyzePending() {
+  if (typeof window === 'undefined') return
+  sessionStorage.removeItem(ANALYZE_PENDING_KEY)
 }
 
 export function filterApplications(

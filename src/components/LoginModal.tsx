@@ -7,6 +7,7 @@ import { getSafeRedirectPath } from '@/lib/utils'
 import Modal from './Modal'
 
 const SHOW_EMAIL_AUTH = false
+const AUTH_NEXT_COOKIE = 'auth-next'
 
 function GoogleIcon() {
   return (
@@ -75,6 +76,9 @@ export default function LoginModal({
   async function handleGoogleSignIn() {
     setLoading(true)
     resetFeedback()
+
+    // Backup in case the OAuth redirect drops query params
+    document.cookie = `${AUTH_NEXT_COOKIE}=${encodeURIComponent(next)}; path=/; max-age=600; SameSite=Lax`
 
     const supabase = createClient()
     const { error: signInError } = await supabase.auth.signInWithOAuth({

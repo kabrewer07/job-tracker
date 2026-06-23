@@ -11,6 +11,7 @@ import type { ApplicationInsert, ApplicationStatus } from '@/lib/types'
 import { STATUS_OPTIONS, statusRequiresDateApplied } from '@/lib/types'
 import {
   buildApplicationPayload,
+  clearAnalyzePending,
   restoreAnalyzePending,
   saveAnalyzePending,
 } from '@/lib/utils'
@@ -185,6 +186,7 @@ export default function JobAnalyzer({ embedded = false }: { embedded?: boolean }
     if (pending) {
       setJobDescription(pending.jobDescription)
       setAnalysis(pending.analysis)
+      clearAnalyzePending()
     }
 
     if (embedded) return
