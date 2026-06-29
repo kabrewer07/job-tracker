@@ -1,9 +1,10 @@
 'use client'
 
 import { useLoginModal } from './LoginModalProvider'
+import { POST_LOGIN_PATH } from '@/lib/utils'
 
 export default function SignInButton({
-  next = '/dashboard',
+  next = POST_LOGIN_PATH,
   className,
   children,
   onBeforeOpen,

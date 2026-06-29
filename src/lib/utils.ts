@@ -59,6 +59,32 @@ export function cn(...classes: (string | undefined | false | null)[]): string {
 
 const ANALYZE_PENDING_KEY = 'job-tracker-analyze-pending'
 
+/** Where users land after a normal sign-in (OAuth or email/password). */
+export const POST_LOGIN_PATH = '/dashboard'
+
+const ALLOWED_LOGIN_REDIRECTS = new Set([
+  '/dashboard',
+  '/dashboard/analyze',
+  '/dashboard/applications',
+  '/dashboard/monitor',
+  '/auth/update-password',
+])
+
+/** Validates post-login destination; falls back to dashboard. */
+export function getPostLoginPath(
+  next: string | null | undefined,
+  fallback = POST_LOGIN_PATH
+): string {
+  if (!next || !next.startsWith('/') || next.startsWith('//')) {
+    return fallback
+  }
+  const path = next.split('?')[0]
+  if (ALLOWED_LOGIN_REDIRECTS.has(path)) {
+    return path
+  }
+  return fallback
+}
+
 export function getSafeRedirectPath(
   next: string | null | undefined,
   fallback = '/dashboard'

@@ -12,7 +12,7 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) redirect('/?login=1&next=/dashboard')
+  if (!user) redirect('/?login=1')
 
   return <NavShell email={user.email ?? ''}>{children}</NavShell>
 }

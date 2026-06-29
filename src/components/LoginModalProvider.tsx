@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { getSafeRedirectPath } from '@/lib/utils'
+import { getPostLoginPath } from '@/lib/utils'
 import LoginModal from './LoginModal'
 
 interface LoginModalContextValue {
@@ -59,20 +59,17 @@ export default function LoginModalProvider({
     }
   }, [pathname, router, searchParams])
 
-  const openLogin = useCallback(
-    (nextPath = '/dashboard') => {
-      setNext(getSafeRedirectPath(nextPath))
-      setInitialError(null)
-      setOpen(true)
-    },
-    []
-  )
+  const openLogin = useCallback((nextPath?: string) => {
+    setNext(getPostLoginPath(nextPath))
+    setInitialError(null)
+    setOpen(true)
+  }, [])
 
   useEffect(() => {
     if (searchParams.get('login') !== '1') return
 
     setOpen(true)
-    setNext(getSafeRedirectPath(searchParams.get('next')))
+    setNext(getPostLoginPath(searchParams.get('next')))
 
     if (searchParams.get('error') === 'auth') {
       setInitialError('Sign in failed. Please try again.')

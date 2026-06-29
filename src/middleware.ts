@@ -1,15 +1,12 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { getSafeRedirectPath } from '@/lib/utils'
+import { getPostLoginPath } from '@/lib/utils'
 import { NextResponse, type NextRequest } from 'next/server'
 
-function loginRedirectUrl(request: NextRequest, next?: string | null) {
+function loginRedirectUrl(request: NextRequest) {
   const url = new URL(request.url)
   url.pathname = '/'
   url.search = ''
   url.searchParams.set('login', '1')
-  if (next) {
-    url.searchParams.set('next', getSafeRedirectPath(next))
-  }
   return url
 }
 
@@ -47,17 +44,14 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   if (pathname === '/login') {
-    const url = loginRedirectUrl(
-      request,
-      request.nextUrl.searchParams.get('next')
-    )
+    const url = loginRedirectUrl(request)
     const error = request.nextUrl.searchParams.get('error')
     if (error) url.searchParams.set('error', error)
     return NextResponse.redirect(url)
   }
 
   if (user && request.nextUrl.searchParams.get('login') === '1') {
-    const next = getSafeRedirectPath(request.nextUrl.searchParams.get('next'))
+    const next = getPostLoginPath(request.nextUrl.searchParams.get('next'))
     return NextResponse.redirect(new URL(next, request.url))
   }
 
@@ -67,13 +61,11 @@ export async function middleware(request: NextRequest) {
 
   // Redirect unauthenticated users away from protected routes
   if (!user && pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(loginRedirectUrl(request, pathname))
+    return NextResponse.redirect(loginRedirectUrl(request))
   }
 
   if (!user && pathname === '/auth/update-password') {
-    return NextResponse.redirect(
-      loginRedirectUrl(request, '/auth/update-password')
-    )
+    return NextResponse.redirect(loginRedirectUrl(request))
   }
 
   return supabaseResponse

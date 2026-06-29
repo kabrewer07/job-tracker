@@ -43,6 +43,19 @@ function SparkleIcon() {
   )
 }
 
+function RadarIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="8" r="5.5" />
+      <circle cx="8" cy="8" r="2" />
+      <line x1="8" y1="2.5" x2="8" y2="5" />
+      <line x1="8" y1="11" x2="8" y2="13.5" />
+      <line x1="2.5" y1="8" x2="5" y2="8" />
+      <line x1="11" y1="8" x2="13.5" y2="8" />
+    </svg>
+  )
+}
+
 function LogOutIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -57,6 +70,7 @@ const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Overview', icon: <LayoutIcon /> },
   { href: '/dashboard/applications', label: 'Applications', icon: <TableIcon /> },
   { href: '/dashboard/analyze', label: 'AI Analyzer', icon: <SparkleIcon /> },
+  { href: '/dashboard/monitor', label: 'Job Monitor', icon: <RadarIcon /> },
 ]
 
 interface SidebarProps {

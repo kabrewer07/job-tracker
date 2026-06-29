@@ -25,22 +25,7 @@ Go to [supabase.com](https://supabase.com), create a project, then grab your key
 
 ### 3. Run the migration
 
-Open the **SQL Editor** in the Supabase dashboard and paste in `supabase/migrations/0001_initial.sql`. This is the only migration needed for a fresh project — it creates the `applications` table (including the `saved` / “Not applied yet” status and optional apply date), indexes, RLS policies, grants, and the `updated_at` trigger.
-
-<details>
-<summary>Already ran an older version of 0001?</summary>
-
-If your schema still requires `date_applied` and lacks the `saved` status, run this once in the SQL editor:
-
-```sql
-alter table public.applications alter column date_applied drop not null;
-alter table public.applications drop constraint if exists applications_status_check;
-alter table public.applications add constraint applications_status_check
-  check (status in ('saved', 'applied', 'interviewing', 'offer', 'rejected'));
-alter table public.applications alter column status set default 'saved';
-```
-
-</details>
+Open the **SQL Editor** in the Supabase dashboard and paste in `supabase/migrations/0001_initial.sql`. This is the only migration needed for a fresh project — it creates `applications`, Job Monitor tables (`monitored_sources`, `excluded_keywords`, `discovered_jobs`), indexes, RLS policies, grants, and the `updated_at` trigger.
 
 ### 4. Environment variables
 

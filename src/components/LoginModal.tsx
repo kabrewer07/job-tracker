@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { getSafeRedirectPath } from '@/lib/utils'
+import { getPostLoginPath } from '@/lib/utils'
 import Modal from './Modal'
 
 const SHOW_EMAIL_AUTH = false
@@ -46,7 +46,7 @@ export default function LoginModal({
   initialError = null,
 }: LoginModalProps) {
   const router = useRouter()
-  const next = getSafeRedirectPath(nextProp)
+  const next = getPostLoginPath(nextProp)
 
   const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin')
   const [email, setEmail] = useState('')
@@ -77,7 +77,6 @@ export default function LoginModal({
     setLoading(true)
     resetFeedback()
 
-    // Backup in case the OAuth redirect drops query params
     document.cookie = `${AUTH_NEXT_COOKIE}=${encodeURIComponent(next)}; path=/; max-age=600; SameSite=Lax`
 
     const supabase = createClient()

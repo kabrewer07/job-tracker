@@ -34,10 +34,7 @@ export default function PublicAnalyzeView() {
             >
               ← Back
             </Link>
-            <SignInButton
-              next="/dashboard/analyze"
-              className="btn-primary text-xs sm:text-sm"
-            >
+            <SignInButton className="btn-primary text-xs sm:text-sm">
               Sign in
             </SignInButton>
           </nav>
