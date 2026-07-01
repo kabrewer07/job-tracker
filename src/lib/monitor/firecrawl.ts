@@ -23,8 +23,8 @@ export async function scrapeToMarkdown(url: string): Promise<string> {
     body: JSON.stringify({
       url,
       formats: ['markdown'],
-      onlyMainContent: true,
-      waitFor: 5000, // wait 5s for SPA pages to fetch and render job data
+      onlyMainContent: false,
+      waitFor: 8000,
     }),
   })
 

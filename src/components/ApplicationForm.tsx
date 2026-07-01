@@ -8,6 +8,7 @@ import { buildApplicationPayload, formatDateInput } from '@/lib/utils'
 
 interface ApplicationFormProps {
   application?: Application
+  initialValues?: Partial<ApplicationInsert>
   onSuccess: () => void
   onCancel: () => void
 }
@@ -18,6 +19,7 @@ type FormState = Omit<ApplicationInsert, 'date_applied'> & { date_applied: strin
 
 export default function ApplicationForm({
   application,
+  initialValues,
   onSuccess,
   onCancel,
 }: ApplicationFormProps) {
@@ -25,16 +27,23 @@ export default function ApplicationForm({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
+  const defaults = initialValues ?? {}
+  const defaultStatus = application?.status ?? defaults.status ?? 'applied'
+
   const [form, setForm] = useState<FormState>({
-    company: application?.company ?? '',
-    role: application?.role ?? '',
+    company: application?.company ?? defaults.company ?? '',
+    role: application?.role ?? defaults.role ?? '',
     date_applied: application
       ? formatDateInput(application.date_applied)
-      : today,
-    status: application?.status ?? 'applied',
-    job_url: application?.job_url ?? '',
-    notes: application?.notes ?? '',
-    job_description: application?.job_description ?? '',
+      : defaultStatus === 'saved'
+        ? ''
+        : defaults.date_applied
+          ? formatDateInput(defaults.date_applied)
+          : today,
+    status: defaultStatus,
+    job_url: application?.job_url ?? defaults.job_url ?? '',
+    notes: application?.notes ?? defaults.notes ?? '',
+    job_description: application?.job_description ?? defaults.job_description ?? '',
   })
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {

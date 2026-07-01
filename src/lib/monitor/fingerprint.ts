@@ -1,5 +1,19 @@
 import { createHash } from 'crypto'
 
+function normalizeIdentityPart(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^\w\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/** Normalized title|company key — same basis as fingerprint, without the hash. */
+export function jobIdentityKey(title: string, company: string | null): string {
+  return `${normalizeIdentityPart(title)}|${normalizeIdentityPart(company ?? '')}`
+}
+
 /**
  * Stable de-dupe key for a job. Two postings are "the same" if their normalized
  * title + company match. This is what the (user_id, fingerprint) unique constraint
@@ -11,14 +25,5 @@ import { createHash } from 'crypto'
  * whenever its URL changes.
  */
 export function fingerprint(title: string, company: string | null): string {
-  const norm = (s: string) =>
-    s
-      .toLowerCase()
-      .normalize('NFKD')
-      .replace(/[^\w\s]/g, '') // strip punctuation
-      .replace(/\s+/g, ' ')
-      .trim()
-
-  const key = `${norm(title)}|${norm(company ?? '')}`
-  return createHash('sha256').update(key).digest('hex')
+  return createHash('sha256').update(jobIdentityKey(title, company)).digest('hex')
 }

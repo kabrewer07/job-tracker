@@ -6,7 +6,7 @@ import type {
   FilterState,
   SortState,
 } from './types'
-import { statusRequiresDateApplied } from './types'
+import { STATUS_SORT_ORDER, statusRequiresDateApplied } from './types'
 
 export function formatDate(dateString: string | null): string {
   if (!dateString) return '—'
@@ -157,20 +157,41 @@ export function filterApplications(
   })
 }
 
+function compareIsoDate(
+  a: string | null | undefined,
+  b: string | null | undefined
+): number {
+  const valA = a?.trim() ?? ''
+  const valB = b?.trim() ?? ''
+  if (!valA && !valB) return 0
+  if (!valA) return 1
+  if (!valB) return -1
+  return valA.localeCompare(valB)
+}
+
+function tiebreakApplications(a: Application, b: Application): number {
+  const byCompany = a.company.localeCompare(b.company)
+  if (byCompany !== 0) return byCompany
+  return a.role.localeCompare(b.role)
+}
+
 export function sortApplications(
   applications: Application[],
   sort: SortState
 ): Application[] {
   return [...applications].sort((a, b) => {
-    let valA: string = a[sort.field] ?? ''
-    let valB: string = b[sort.field] ?? ''
+    let cmp = 0
 
     if (sort.field === 'date_applied' || sort.field === 'created_at') {
-      valA = a[sort.field] ?? ''
-      valB = b[sort.field] ?? ''
+      cmp = compareIsoDate(a[sort.field], b[sort.field])
+    } else if (sort.field === 'status') {
+      cmp = STATUS_SORT_ORDER[a.status] - STATUS_SORT_ORDER[b.status]
+    } else {
+      cmp = (a[sort.field] ?? '').localeCompare(b[sort.field] ?? '')
     }
 
-    const cmp = valA.localeCompare(valB)
-    return sort.direction === 'asc' ? cmp : -cmp
+    const primary = sort.direction === 'asc' ? cmp : -cmp
+    if (primary !== 0) return primary
+    return tiebreakApplications(a, b)
   })
 }

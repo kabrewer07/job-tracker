@@ -38,6 +38,14 @@ export type ApplicationUpdate = Partial<ApplicationInsert>
 export type SortField = 'company' | 'role' | 'date_applied' | 'status' | 'created_at'
 export type SortDirection = 'asc' | 'desc'
 
+export const STATUS_SORT_ORDER: Record<ApplicationStatus, number> = {
+  saved: 0,
+  applied: 1,
+  interviewing: 2,
+  offer: 3,
+  rejected: 4,
+}
+
 export interface SortState {
   field: SortField
   direction: SortDirection

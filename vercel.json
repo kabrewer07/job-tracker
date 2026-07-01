@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/job-monitor",
-      "schedule": "0 14 * * *"
+      "schedule": "0 19 * * *"
     }
   ]
 }

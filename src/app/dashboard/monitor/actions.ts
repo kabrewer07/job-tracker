@@ -31,11 +31,13 @@ export async function addSource(formData: FormData) {
   const { supabase, user } = await getAuthenticatedClient()
   const url = normalizeUrl(formData.get('url')?.toString() ?? '')
   const label = formData.get('label')?.toString().trim() || null
+  const denseListing = formData.get('dense_listing') === 'on'
 
   const { error } = await supabase.from('monitored_sources').insert({
     user_id: user.id,
     url,
     label,
+    dense_listing: denseListing,
   })
 
   if (error) throw new Error(error.message)
@@ -48,6 +50,33 @@ export async function removeSource(id: string) {
   const { error } = await supabase
     .from('monitored_sources')
     .delete()
+    .eq('id', id)
+    .eq('user_id', user.id)
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/dashboard/monitor')
+}
+
+export async function updateSourceUrl(id: string, url: string) {
+  const { supabase, user } = await getAuthenticatedClient()
+  const normalized = normalizeUrl(url)
+
+  const { error } = await supabase
+    .from('monitored_sources')
+    .update({ url: normalized })
+    .eq('id', id)
+    .eq('user_id', user.id)
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/dashboard/monitor')
+}
+
+export async function toggleDenseListing(id: string, denseListing: boolean) {
+  const { supabase, user } = await getAuthenticatedClient()
+
+  const { error } = await supabase
+    .from('monitored_sources')
+    .update({ dense_listing: denseListing })
     .eq('id', id)
     .eq('user_id', user.id)
 
